@@ -12,7 +12,96 @@ citations, and writes every query to a compliance audit log.
 > closest-passage answers) so you can build/test/evaluate everything without
 > any API access or cost. If you ever paste a real key into a chat or commit
 > it to a repo, treat it as compromised and rotate it immediately.
+---
+## Project Flow
+                     Enterprise Policy Documents
+      (JSON / CSV / PDF / Operations Manuals / SOPs)
+                              │
+                              ▼
+                    Document Ingestion Pipeline
+      ┌─────────────────────────────────────────────┐
+      │ • Load policy documents                     │
+      │ • Parse JSON / CSV / PDF                    │
+      │ • Clean & normalize text                    │
+      │ • Extract metadata (Department, Policy ID)  │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                       Text Chunking
+      ┌─────────────────────────────────────────────┐
+      │ • Split long documents                      │
+      │ • Overlapping semantic chunks               │
+      │ • Preserve policy references                │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                    Embedding Generation
+      ┌─────────────────────────────────────────────┐
+      │ • OpenAI text-embedding-3-small             │
+      │ • Convert each chunk → Vector               │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                    Vector Database Index
+      ┌─────────────────────────────────────────────┐
+      │ Azure AI Search / ChromaDB                  │
+      │ Store:                                      │
+      │ • Embeddings                                │
+      │ • Metadata                                  │
+      │ • Policy IDs                                │ 
+      │ • Source References                         │ 
+      └─────────────────────────────────────────────┘
+                              │
+────────────────────────── Runtime ──────────────────────────
+                              │
+                              ▼
+                     User Question
+                              │
+                              ▼
+                  Query Embedding Generation
+                              │
+                              ▼
+                  Hybrid Semantic Retrieval
+      ┌─────────────────────────────────────────────┐
+      │ • Vector Similarity Search                  │
+      │ • Metadata Filtering                        │
+      │ • Top-K Relevant Policy Chunks              │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                 Prompt Construction (RAG)
+      ┌─────────────────────────────────────────────┐
+      │ System Prompt                               │
+      │ + Retrieved Policy Chunks                   │
+      │ + User Question                             │
+      │ + Citation Instructions                     │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                     Azure OpenAI GPT Model
+                              │
+                              ▼
+                 Grounded Response Generation
+      ┌─────────────────────────────────────────────┐
+      │ • Answer only from retrieved policies       │
+      │ • Include Policy ID citations               │
+      │ • Refuse unsupported questions              │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                 Evaluation & Audit Logging
+      ┌─────────────────────────────────────────────┐
+      │ • Faithfulness                              │
+      │ • Groundedness                              │
+      │ • Citation Accuracy                         │
+      │ • Department Routing                        │
+      │ • Response Logs                             │
+      └─────────────────────────────────────────────┘
+                              │
+                              ▼
+                     Streamlit Chat UI
 
+---
 ## Architecture
 
 ```

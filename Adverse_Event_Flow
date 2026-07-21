@@ -1,0 +1,154 @@
+# Adverse Event Classification
+
+A machine learning pipeline for **pharmacovigilance adverse-event classification** using clinical narrative text plus structured patient/case features.
+
+This project trains a classifier to identify likely serious adverse cases, generates explainability outputs, monitors drift, and scores new batches of incoming records.
+
+---
+
+## Project Overview
+
+This repository contains an end-to-end workflow that:
+
+- Trains a text + structured-data classifier on labeled pharmacovigilance cases
+- Optimizes for high sensitivity to serious events (reduce missed serious cases)
+- Produces model evaluation artifacts (confusion matrix, PR curve, etc.)
+- Generates SHAP explainability outputs
+- Runs batch scoring on new records
+- Tracks experiments with MLflow
+
+Main orchestration entrypoint:
+
+- `run_all.py` → runs training + batch scoring and writes artifacts to `./reports/`
+
+---
+
+## Repository Structure
+
+```text
+Adverse-Event-Classification/
+├── data/
+│   ├── pharmacovigilance_cases.csv
+│   └── pv_cases.db
+├── models/
+│   └── mlruns/                  # MLflow tracking artifacts
+├── pipelines/
+│   ├── train_pipeline.py        # Model training, evaluation, explainability, drift outputs
+│   └── batch_scoring.py         # Batch inference on new cases
+├── reports/                     # Generated outputs
+├── pv_classifier_report.html    # Project/report artifact
+└── run_all.py                   # End-to-end runner
+```
+
+---
+
+## Quick Start
+
+### 1) Clone the repository
+
+```bash
+git clone https://github.com/Murali-Krishna22ds/Adverse-Event-Classification.git
+cd Adverse-Event-Classification
+```
+
+### 2) Create and activate a virtual environment
+
+**Linux / macOS**
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+**Windows (PowerShell)**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+### 3) Install dependencies
+
+If a `requirements.txt` exists:
+```bash
+pip install -r requirements.txt
+```
+
+If not, install likely core packages manually (adjust as needed):
+```bash
+pip install pandas numpy scikit-learn shap matplotlib seaborn mlflow
+```
+
+### 4) Run the full pipeline
+
+```bash
+python run_all.py
+```
+
+---
+
+## Outputs
+
+After running `python run_all.py`, expected artifacts include:
+
+- `reports/shap_feature_importance.png`
+- `reports/shap_summary.json`
+- `reports/confusion_matrix.png`
+- `reports/pr_curve.png`
+- `reports/drift_report.json`
+- `reports/batch_scored_cases.csv`
+- MLflow experiments under `models/mlruns/`
+
+---
+
+## Pipeline Components
+
+### `pipelines/train_pipeline.py`
+Handles:
+- data loading and preprocessing
+- feature preparation (text + structured fields)
+- model training
+- evaluation metric generation
+- explainability outputs (SHAP)
+- drift reporting
+
+### `pipelines/batch_scoring.py`
+Handles:
+- loading trained model artifacts
+- scoring incoming/new records
+- writing scored outputs for downstream review
+
+### `run_all.py`
+Master script that:
+1. runs the training pipeline
+2. runs batch scoring on new cases
+3. writes all artifacts to `reports/`
+
+---
+
+## Use Case
+
+Designed for pharmacovigilance workflows where triage teams need to prioritize potentially serious reports quickly.  
+The modeling approach intentionally favors catching serious cases, even at the cost of increased false positives.
+
+---
+
+## Notes
+
+- This repository includes dataset artifacts in `data/` and experiment outputs in `models/mlruns/`.
+- Consider using `.gitignore` for temporary files and Python caches (e.g., `__pycache__/`, `.venv/`) if not already configured.
+- For reproducibility, pin package versions in `requirements.txt`.
+
+---
+
+## Future Improvements
+
+- Add explicit dependency lock file (`requirements.txt` or `pyproject.toml`)
+- Add unit/integration tests for pipeline stages
+- Add configurable threshold tuning for precision/recall tradeoff
+- Add CI workflow for linting and smoke tests
+
+---
+
+## License
+
+No license file is currently present in this repository.  
+Add a `LICENSE` file (e.g., MIT, Apache-2.0) if you plan to share or reuse this work publicly.

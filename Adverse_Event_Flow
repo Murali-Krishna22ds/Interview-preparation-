@@ -22,7 +22,107 @@ Main orchestration entrypoint:
 - `run_all.py` → runs training + batch scoring and writes artifacts to `./reports/`
 
 ---
+## Project Flow
+                    PHARMACOVIGILANCE CASES
+                              │
+                              ▼
+                  Data Collection & Storage
+          (CSV Dataset / SQLite Database)
+                              │
+                              ▼
+                  Data Preprocessing Pipeline
+        ┌────────────────────────────────────┐
+        │ • Missing value handling           │
+        │ • Text cleaning                    │
+        │ • Feature selection                │
+        │ • Train/Test split                 │
+        └────────────────────────────────────┘
+                              │
+                              ▼
+              Feature Engineering
+      ┌──────────────────────────────────────┐
+      │ Clinical Narrative (Text)            │
+      │  • TF-IDF Vectorization              │
+      │                                      │
+      │ Structured Features                  │
+      │  • Age                              │
+      │  • Gender                           │
+      │  • Drug                             │
+      │  • Event Type                       │
+      │  • Other Case Features              │
+      └──────────────────────────────────────┘
+                              │
+                              ▼
+                 Feature Concatenation
+          (Text Features + Structured Data)
+                              │
+                              ▼
+                  Machine Learning Model
+          (High Recall Serious AE Classifier)
+                              │
+                              ▼
+          Threshold Optimization (Recall Focus)
+                              │
+                              ▼
+                  Model Evaluation
+      ┌──────────────────────────────────────┐
+      │ • Accuracy                           │
+      │ • Precision                          │
+      │ • Recall                             │
+      │ • F1 Score                           │
+      │ • ROC-AUC                            │
+      │ • PR Curve                           │
+      │ • Confusion Matrix                   │
+      └──────────────────────────────────────┘
+                              │
+                              ▼
+                 Explainable AI (SHAP)
+      ┌──────────────────────────────────────┐
+      │ • Global Feature Importance          │
+      │ • SHAP Summary                       │
+      │ • Feature Contribution               │
+      └──────────────────────────────────────┘
+                              │
+                              ▼
+                  Model Tracking (MLflow)
+      ┌──────────────────────────────────────┐
+      │ • Parameters                         │
+      │ • Metrics                            │
+      │ • Artifacts                          │
+      │ • Model Version                      │
+      └──────────────────────────────────────┘
+                              │
+                              ▼
+                 Drift Monitoring
+      ┌──────────────────────────────────────┐
+      │ • Feature Drift                      │
+      │ • Data Distribution Changes          │
+      └──────────────────────────────────────┘
+                              │
+                              ▼
+              Batch Scoring Pipeline
+      ┌──────────────────────────────────────┐
+      │ New Incoming Cases                   │
+      │        ↓                             │
+      │ Load Saved Model                     │
+      │        ↓                             │
+      │ Predict Serious / Non-Serious        │
+      │        ↓                             │
+      │ Export Scored CSV                    │
+      └──────────────────────────────────────┘
+                              │
+                              ▼
+                 Final Reports Generated
+      ┌──────────────────────────────────────┐
+      │ confusion_matrix.png                 │
+      │ pr_curve.png                         │
+      │ shap_feature_importance.png          │
+      │ shap_summary.json                    │
+      │ drift_report.json                    │
+      │ batch_scored_cases.csv               │
+      └──────────────────────────────────────┘
 
+---
 ## Repository Structure
 
 ```text
@@ -152,3 +252,4 @@ The modeling approach intentionally favors catching serious cases, even at the c
 
 No license file is currently present in this repository.  
 Add a `LICENSE` file (e.g., MIT, Apache-2.0) if you plan to share or reuse this work publicly.
+
